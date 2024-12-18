@@ -1,0 +1,8 @@
+ {% for product in  vendor_collection.products %}
+         {% if product.available %}
+             {% assign product_image = product.featured_image %}
+                           {% break %}
+                        {% endif %}
+{% endfor %}
+
+ <img src="{{ product_image | image_url: width: 263, height: 263 }}" />
