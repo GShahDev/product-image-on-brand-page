@@ -1,0 +1,159 @@
+<section class="section vendor-collection-list" >
+  <div class="collection-navigator">
+     {% assign col_list_nav = section.settings.vendor_collection_list %}
+        <a href="#character-all" class="active" data-character="all" >All</a>
+     {% if col_list_nav == blank %}
+       {% for vendor in shop.vendors %}
+          {% assign vendor_handelize = vendor | handle | strip %}
+          {% assign vendor_collection = collections[vendor_handelize] %}
+          {% assign char = vendor_collection.title | upcase | truncate: 1, '' | strip %}
+          {% comment %} <script>
+            console.log({{ vendor_collection.title | json }});
+            console.log({{ char | json }});
+          </script> {% endcomment %}
+          {% assign char_num = char | times: 1 %}
+          {% if char == '0' or char_num > 0 %}
+            {% unless currentChar == '0-9' %}
+              {% assign currentChar = '0-9' %}
+              {% assign all_characters = all_characters | append: currentChar | append: '   ' %}
+              {% assign ch_count = ch_count | plus: 1 %}
+              <a href="#{{ currentChar | downcase }}" class="" data-character="{{ currentChar | upcase }}" >{{ currentChar }}</a>
+            {% endunless %}
+          {% else %}
+            <script>
+              console.log("currentChar ="+{{ currentChar | json }});
+              console.log("Char ="+{{ char | json }});
+            </script>
+            {% if char != currentChar %}
+              {% unless forloop.first %}
+              <a href="#{{ char | downcase }}" data-character="{{ char | upcase }}" >{{ char }}</a> 
+            {% endunless %}
+              {% assign currentChar = char %}
+              {% assign all_characters = all_characters | append: currentChar | append: '   ' %}
+              {% assign ch_count = ch_count | plus: 1 %}
+            {% endif %}
+          {% endif %}
+      {% endfor %}
+    {% else %}
+        {% for collection in col_list_nav %}
+          {% assign char = collection.title | upcase | truncate: 1, '' %}
+            {% assign char_num = char | times: 1 %}
+            {% if char == '0' or char_num > 0 %}
+              {% unless currentChar == '0-9' %}
+                {% assign currentChar = '0-9' %}
+                {% assign all_characters = all_characters | append: currentChar | append: '   ' %}
+                {% assign ch_count = ch_count | plus: 1 %}
+                <a href="#{{ currentChar | downcase }}"  data-character="{{ currentChar | upcase }}">{{ currentChar }}</a>
+              {% endunless %}
+            {% else %}
+              {% if char != currentChar %} 
+                <a href="#{{ char | downcase }}"  data-character="{{ char | upcase }}">{{ char }}</a>
+                {% assign currentChar = char %}
+                {% assign all_characters = all_characters | append: currentChar | append: '   ' %}
+                {% assign ch_count = ch_count | plus: 1 %}
+              {% endif %}
+            {% endif %}
+        {% endfor %}
+     {% endif %}
+  </div>
+  <div class="container">
+      <div class="one-whole column center all-artist">
+          
+         {% assign col_list = section.settings.vendor_collection_list %} 
+          {% if col_list == blank %}
+            
+              {% for vendor in shop.vendors %}
+                 {% assign vendor_handelize = vendor | handle %}
+                 {% assign vendor_collection = collections[vendor_handelize] %}
+                   {% if vendor_collection != blank %}
+
+                     {% for product in  vendor_collection.products %}
+                       {% if product.available %}
+                           {% assign product_image = product.featured_image %}
+                           {% break %}
+                        {% endif %}
+                    {% endfor %}
+                     
+                    {% assign image = vendor_collection.products.first.featured_image %}
+                    <div class="each-artist-1" data-char="{{  vendor_collection.title | upcase | truncate: 1, '' }}">
+                      <a href="{{ vendor_collection.url }}">
+                         
+                         <img src="{{ product_image | image_url: width: 263, height: 263 }}" />
+                         <p>{{ vendor_collection.title }}</p>
+                      </a>
+                    </div>
+                   {% endif %}
+              {% endfor %}
+          {% else %}
+
+             
+             
+              {% for collection in col_list %}
+                
+                  {% for product in  collection.products %}
+                       {% if product.available %}
+                           {% assign product_image = product.featured_image %}
+                           {% break %}
+                        {% endif %}
+                    {% endfor %}
+               <div class="each-artist" data-char="{{  collection.title | upcase | truncate: 1, '' }}">
+                <a href="{{ collection.url }}">
+                   
+                   <img src="{{ product_image | image_url: width: 263, height: 263 }}" />
+                   <p>{{ collection.title }}</p>
+                </a>     
+               </div>
+              {% endfor %}
+          {% endif %}
+         
+      </div>
+  </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const navigatorLinks = document.querySelectorAll('.collection-navigator a');
+        const characters = document.querySelectorAll('.each-artist');
+
+        navigatorLinks.forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const characterToShow = this.getAttribute('data-character');
+
+                characters.forEach(character => {
+                    if (character.getAttribute('data-char') === characterToShow || characterToShow === 'all') {
+                        character.classList.remove('hide');
+                    } else {
+                        character.classList.add('hide');
+                    }
+                });
+
+                navigatorLinks.forEach(navLink => {
+                    navLink.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+    });
+</script>
+
+{% schema %}
+{
+  "name": "Vendor Collection List",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "collection_list",
+      "label": "vendor collection list",
+      "id": "vendor_collection_list",
+      "info": "if its blank all vendor collection will be displayed"
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Vendor Collection List"
+    }
+  ]
+}
+{% endschema %}
